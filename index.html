@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>TLAXICOM - Test de Velocidad</title>
+  <title>TLAXICOM</title>
   
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -357,6 +357,16 @@
       transition: transform 0.3s;
     }
 
+    #startBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(15, 50, 163, 0.9);
+    }
+
+    #startBtn:disabled {
+      opacity: 0.7;
+      transform: none !important;
+    }
+
     .test-status {
       margin-top: 0.8em;
       color: var(--text-primary);
@@ -517,7 +527,7 @@
         <div class="subtitle">Internet a tu alcance</div>
       </div>
     </div>
-    <img src="favicon-96.png" alt="Logo TLAXICOM" class="logo" />
+    <img src="logo/favicon-96.png" alt="Logo TLAXICOM" class="logo" />
   </header>
 
   <!-- Contenido principal -->
@@ -583,16 +593,15 @@
   </div>
 
   <script>
+    // ===== CONFIGURACIÓN INICIAL =====
     const s = new Speedtest();
     let testInProgress = false;
     
-    // Configuración del test
-    s.setParameter("server_ping", "auto");
-    s.setParameter("telemetry_level", "basic");
-    s.setParameter("time_ul_max", 10);
-    s.setParameter("time_dl_max", 10);
+    // ===== FUNCIONES PRINCIPALES =====
     
-    // Función para mostrar notificaciones
+    /**
+     * Muestra notificaciones emergentes
+     */
     function showNotification(type, message, duration = 3000) {
       const container = document.getElementById('notificationContainer');
       const icons = {
@@ -616,7 +625,7 @@
       
       notification.classList.add('show');
       
-      // Ocultar después de la duración
+      // Ocultar después de la duración especificada
       setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {
@@ -625,7 +634,9 @@
       }, duration);
     }
     
-    // Función para crear partículas dinámicas
+    /**
+     * Crea partículas animadas de fondo
+     */
     function createParticles() {
       const container = document.getElementById('particles-container');
       container.innerHTML = '';
@@ -637,15 +648,18 @@
         const particle = document.createElement('div');
         particle.className = 'particle';
         
+        // Posición aleatoria
         particle.style.left = `${Math.random() * 100}%`;
         particle.style.top = `${Math.random() * 100}%`;
         
+        // Tamaño y color aleatorio
         const size = Math.random() * 3 + 1;
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         particle.style.opacity = Math.random() * 0.6 + 0.2;
         particle.style.background = colors[Math.floor(Math.random() * colors.length)];
         
+        // Animación única para cada partícula
         const tx = (Math.random() - 0.5) * 150;
         const ty = (Math.random() - 0.5) * 150;
         particle.style.setProperty('--tx', `${tx}px`);
@@ -657,7 +671,9 @@
       }
     }
     
-    // Función para animar cambios de valor
+    /**
+     * Anima el cambio de valores numéricos
+     */
     function animateValue(id, target) {
       const element = document.getElementById(id);
       const current = parseFloat(element.textContent) || 0;
@@ -678,7 +694,9 @@
       update();
     }
 
-    // Función para actualizar resultados
+    /**
+     * Actualiza los resultados del test en la interfaz
+     */
     function updateResults(data) {
       try {
         const dl = parseFloat(data.dlStatus || 0).toFixed(1);
@@ -687,17 +705,20 @@
         const jitter = parseFloat(data.jitterStatus || 0).toFixed(1);
         const avg = ((parseFloat(dl) + parseFloat(ul)) / 2).toFixed(1);
 
+        // Animar los cambios de valor
         animateValue("dlSpeed", dl);
         animateValue("ulSpeed", ul);
         animateValue("pingText", ping);
         animateValue("jitterText", jitter);
         animateValue("avgSpeed", avg);
 
+        // Actualizar el velocímetro
         const progress = Math.min(avg, 500) / 500 * 100;
         document.querySelector(".gauge-mask").style.setProperty("--progress", progress);
         const degrees = (Math.min(avg, 500) * 0.54) - 135;
         document.getElementById("speedNeedle").style.transform = `rotate(${degrees}deg)`;
         
+        // Actualizar el estado detallado
         if (data.testState === 1) {
           document.getElementById('detailedStatus').innerHTML = `<i class="fas fa-tachometer-alt"></i> Probando descarga: ${dl} Mbps`;
         } else if (data.testState === 2) {
@@ -706,13 +727,15 @@
           document.getElementById('detailedStatus').innerHTML = `<i class="fas fa-bullseye"></i> Probando latencia: ${ping} ms`;
         }
       } catch (error) {
-        console.error("Error updating results:", error);
+        console.error("Error actualizando resultados:", error);
       }
     }
 
-    // Función para manejar errores
+    /**
+     * Maneja errores durante el test
+     */
     function handleError(error) {
-      console.error("Test error:", error);
+      console.error("Error en el test:", error);
       document.getElementById('detailedStatus').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error en la prueba';
       document.getElementById('startBtn').disabled = false;
       document.getElementById('startBtn').innerHTML = '<i class="fas fa-sync-alt"></i> REINTENTAR';
@@ -720,72 +743,83 @@
       showNotification('error', 'Error en la prueba de velocidad', 4000);
     }
 
-    // Función para iniciar prueba
-    function startTest() {
+    /**
+     * Inicia el test de velocidad
+     */
+    async function startTest() {
       if (testInProgress) return;
       
       testInProgress = true;
       const startBtn = document.getElementById('startBtn');
       
+      // Resetear la interfaz
       startBtn.disabled = true;
       startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROBANDO...';
       document.getElementById("detailedStatus").innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando prueba...';
       
+      // Resetear valores
       animateValue("dlSpeed", 0);
       animateValue("ulSpeed", 0);
       animateValue("pingText", 0);
       animateValue("jitterText", 0);
       animateValue("avgSpeed", 0);
-      
       document.querySelector(".gauge-mask").style.setProperty("--progress", "0");
       document.getElementById("speedNeedle").style.transform = "rotate(-135deg)";
       
-      s.onupdate = updateResults;
-
-      s.onend = function() {
-        testInProgress = false;
-        startBtn.disabled = false;
-        startBtn.innerHTML = '<i class="fas fa-sync-alt"></i> REPETIR PRUEBA';
-        document.getElementById('detailedStatus').innerHTML = '<i class="fas fa-check-circle"></i> Prueba completada';
-        
-        showNotification('success', 'Prueba completada', 3000);
-        
-        const testData = {
-          dlStatus: document.getElementById("dlSpeed").textContent,
-          ulStatus: document.getElementById("ulSpeed").textContent,
-          ping: document.getElementById("pingText").textContent,
-          jitter: document.getElementById("jitterText").textContent,
-          timestamp: new Date().toISOString()
-        };
-        localStorage.setItem('lastSpeedTest', JSON.stringify(testData));
-      };
-
       try {
+        // Configurar callbacks del test
+        s.onupdate = updateResults;
+        s.onend = function() {
+          testInProgress = false;
+          startBtn.disabled = false;
+          startBtn.innerHTML = '<i class="fas fa-sync-alt"></i> REPETIR PRUEBA';
+          document.getElementById('detailedStatus').innerHTML = '<i class="fas fa-check-circle"></i> Prueba completada';
+          
+          showNotification('success', 'Prueba completada', 3000);
+          
+          // Guardar resultados
+          const testData = {
+            dlStatus: document.getElementById("dlSpeed").textContent,
+            ulStatus: document.getElementById("ulSpeed").textContent,
+            ping: document.getElementById("pingText").textContent,
+            jitter: document.getElementById("jitterText").textContent,
+            timestamp: new Date().toISOString()
+          };
+          
+          localStorage.setItem('lastSpeedTest', JSON.stringify(testData));
+        };
+
+        // Iniciar el test
         s.start();
       } catch (error) {
         handleError(error);
       }
     }
 
-    // Inicialización
+    // ===== INICIALIZACIÓN AL CARGAR LA PÁGINA =====
     document.addEventListener('DOMContentLoaded', function() {
+      // Configurar elementos visuales
       createParticles();
       window.addEventListener('resize', createParticles);
-      
       const particleInterval = setInterval(createParticles, 6000);
       
+      // Cargar último test guardado (si existe)
       const lastTest = localStorage.getItem('lastSpeedTest');
       if (lastTest) {
         try {
           const testData = JSON.parse(lastTest);
+          
+          // Restaurar métricas
           document.getElementById("dlSpeed").textContent = testData.dlStatus;
           document.getElementById("ulSpeed").textContent = testData.ulStatus;
           document.getElementById("pingText").textContent = testData.ping;
           document.getElementById("jitterText").textContent = testData.jitter;
           
+          // Calcular y mostrar promedio
           const avg = ((parseFloat(testData.dlStatus) + parseFloat(testData.ulStatus)) / 2).toFixed(1);
           document.getElementById("avgSpeed").textContent = avg;
             
+          // Actualizar velocímetro
           const progress = Math.min(avg, 500) / 500 * 100;
           document.querySelector(".gauge-mask").style.setProperty("--progress", progress);
           const degrees = (Math.min(avg, 500) * 0.54) - 135;
@@ -797,6 +831,7 @@
         }
       }
       
+      // Limpieza al salir de la página
       window.addEventListener('beforeunload', () => {
         clearInterval(particleInterval);
       });
