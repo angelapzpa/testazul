@@ -30,3 +30,4 @@ Speedtest.prototype = {
     this.worker.postMessage("abort");
   }
 };
+
